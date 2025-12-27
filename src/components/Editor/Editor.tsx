@@ -8,22 +8,16 @@ import { useComputedColorScheme } from "@mantine/core";
 interface EditorProps {
     initialContent?: string;
     onSave: (content: string) => void;
+    onFocus?: () => void;
 }
 
-const Editor = ({ initialContent, onSave }: EditorProps) => {
+export function Editor({ initialContent, onSave, onFocus }: EditorProps) {
     const colorScheme = useComputedColorScheme('light');
 
     // Create a new editor instance
     const editor = useCreateBlockNote({
         initialContent: initialContent && initialContent !== '[]' ? JSON.parse(initialContent) : undefined,
     });
-
-    // Handle content changes
-    // We can use a debounce here in App or here, but for simplicity let's just expose the change
-    // BlockNote's onChange is triggered on every edit.
-
-    // Actually, useCreateBlockNote doesn't directly expose onChange in its options in all versions, 
-    // but the editor instance does.
 
     useEffect(() => {
         if (editor) {
@@ -35,15 +29,15 @@ const Editor = ({ initialContent, onSave }: EditorProps) => {
     }, [editor, initialContent]);
 
     return (
-        <BlockNoteView
-            editor={editor}
-            theme={colorScheme === 'dark' ? 'dark' : 'light'}
-            onChange={() => {
-                // Get blocks directly from document
-                onSave(JSON.stringify(editor.document));
-            }}
-        />
+        <div onFocus={onFocus} style={{ height: '100%', width: '100%' }}>
+            <BlockNoteView
+                editor={editor}
+                theme={colorScheme === 'dark' ? 'dark' : 'light'}
+                onChange={() => {
+                    // Get blocks directly from document
+                    onSave(JSON.stringify(editor.document));
+                }}
+            />
+        </div>
     );
 }
-
-export { Editor }

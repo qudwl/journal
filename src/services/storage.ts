@@ -8,6 +8,10 @@ export interface JournalEntry {
   lastModified?: Date;
 }
 
+export interface AppSettings {
+  viewMode?: 'feed' | 'single';
+}
+
 const STORAGE_DIR = 'JournalApp';
 
 export class StorageService {
@@ -39,7 +43,7 @@ export class StorageService {
     const result: JournalEntry[] = [];
 
     for (const entry of entries) {
-      if (entry.isFile && !entry.name.endsWith('.meta.json') && !entry.name.startsWith('.')) {
+      if (entry.isFile && !entry.name.endsWith('.meta.json') && !entry.name.startsWith('.') && entry.name !== 'settings.json') {
         // For now, we don't load content for the list to save memory, 
         // strictly listing. We can assume filename is the date or title.
         // Let's create a date from the file creation time or filename if possible.
@@ -130,6 +134,24 @@ export class StorageService {
   static async loadLastOpenedEntry(): Promise<string | null> {
     try {
       return await readTextFile(`${STORAGE_DIR}/.last_opened`, { baseDir: BaseDirectory.Document });
+    } catch {
+      return null;
+    }
+  }
+
+  static async saveSettings(settings: AppSettings): Promise<void> {
+    await this.ensureDir();
+    await writeTextFile(
+      `${STORAGE_DIR}/settings.json`,
+      JSON.stringify(settings),
+      { baseDir: BaseDirectory.Document }
+    );
+  }
+
+  static async loadSettings(): Promise<AppSettings | null> {
+    try {
+      const content = await readTextFile(`${STORAGE_DIR}/settings.json`, { baseDir: BaseDirectory.Document });
+      return JSON.parse(content);
     } catch {
       return null;
     }

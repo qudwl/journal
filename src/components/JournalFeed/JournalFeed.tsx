@@ -1,4 +1,4 @@
-import { Stack, Text, Anchor } from '@mantine/core';
+import { Stack, Text } from '@mantine/core';
 import { useIntersection } from '@mantine/hooks';
 import { FeedEntry } from './FeedEntry';
 import { useState, useEffect, useRef } from 'react';
@@ -73,6 +73,8 @@ export function JournalFeed() {
                             <FeedEntry
                                 entry={entry}
                                 isHighlighted={entry.filename === activeEntryFilename}
+                                onSelect={selectEntry}
+                                onSaveGlobal={saveEntry}
                             />
                         </div>
                     ))}

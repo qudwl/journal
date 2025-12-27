@@ -1,5 +1,6 @@
 import { Modal, Stack, Text, Group, Divider, useMantineColorScheme, SegmentedControl, Center, Box } from '@mantine/core';
-import { IconSun, IconMoon, IconDeviceDesktop } from '@tabler/icons-react';
+import { IconSun, IconMoon, IconDeviceDesktop, IconList, IconFileText } from '@tabler/icons-react';
+import { useStore } from '../../store/useStore';
 
 interface SettingsModalProps {
     opened: boolean;
@@ -8,6 +9,8 @@ interface SettingsModalProps {
 
 export function SettingsModal({ opened, onClose }: SettingsModalProps) {
     const { colorScheme, setColorScheme } = useMantineColorScheme();
+    const viewMode = useStore(state => state.viewMode);
+    const setViewMode = useStore(state => state.setViewMode);
 
     return (
         <Modal opened={opened} onClose={onClose} title="Settings" centered>
@@ -44,6 +47,33 @@ export function SettingsModal({ opened, onClose }: SettingsModalProps) {
                                         <Center>
                                             <IconDeviceDesktop size={16} />
                                             <Box ml={10}>Auto</Box>
+                                        </Center>
+                                    ),
+                                },
+                            ]}
+                        />
+                    </Group>
+                    <Group justify="space-between" mt="md">
+                        <Text size="sm" c="dimmed">Default View</Text>
+                        <SegmentedControl
+                            value={viewMode}
+                            onChange={(value) => setViewMode(value as 'feed' | 'single')}
+                            data={[
+                                {
+                                    value: 'feed',
+                                    label: (
+                                        <Center>
+                                            <IconList size={16} />
+                                            <Box ml={10}>Feed</Box>
+                                        </Center>
+                                    ),
+                                },
+                                {
+                                    value: 'single',
+                                    label: (
+                                        <Center>
+                                            <IconFileText size={16} />
+                                            <Box ml={10}>Entry</Box>
                                         </Center>
                                     ),
                                 },

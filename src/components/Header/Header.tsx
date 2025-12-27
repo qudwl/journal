@@ -1,4 +1,4 @@
-import { Group, Burger, ActionIcon, Button, TextInput, Title, Box } from '@mantine/core';
+import { Group, Burger, ActionIcon, Button, TextInput, Title, Box, Stack, Text } from '@mantine/core';
 import { IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand, IconSettings } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
@@ -13,6 +13,7 @@ export function Header() {
     const currentEntry = useStore(state => state.currentEntry);
     const renameEntry = useStore(state => state.renameEntry);
     const createEntry = useStore(state => state.createEntry);
+    const viewMode = useStore(state => state.viewMode);
 
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [titleEditValue, setTitleEditValue] = useState('');
@@ -61,34 +62,46 @@ export function Header() {
                         >
                             {sidebarOpened ? <IconLayoutSidebarLeftCollapse size={20} /> : <IconLayoutSidebarLeftExpand size={20} />}
                         </ActionIcon>
-                        {isEditingTitle && currentEntry ? (
-                            <TextInput
-                                value={titleEditValue}
-                                onChange={(e) => setTitleEditValue(e.currentTarget.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') saveTitle();
-                                    if (e.key === 'Escape') cancelTitleEdit();
-                                }}
-                                onBlur={saveTitle}
-                                autoFocus
-                                size="md"
-                                styles={{ input: { fontSize: '1.25rem', fontWeight: 600 } }}
-                            />
-                        ) : (
-                            <Title
-                                order={3}
-                                onClick={startEditingTitle}
-                                style={{
-                                    cursor: currentEntry ? 'pointer' : 'default',
-                                    userSelect: 'none',
-                                    transition: 'opacity 0.2s',
-                                }}
-                                onMouseEnter={(e) => currentEntry && (e.currentTarget.style.opacity = '0.7')}
-                                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                            >
-                                {currentEntry?.displayName || 'My Journal'}
-                            </Title>
-                        )}
+                        <Stack gap={0}>
+                            {isEditingTitle && currentEntry ? (
+                                <TextInput
+                                    value={titleEditValue}
+                                    onChange={(e) => setTitleEditValue(e.currentTarget.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') saveTitle();
+                                        if (e.key === 'Escape') cancelTitleEdit();
+                                    }}
+                                    onBlur={saveTitle}
+                                    autoFocus
+                                    size="md"
+                                    styles={{ input: { fontSize: '1.25rem', fontWeight: 600 } }}
+                                />
+                            ) : (
+                                <Title
+                                    order={3}
+                                    onClick={startEditingTitle}
+                                    style={{
+                                        cursor: currentEntry ? 'pointer' : 'default',
+                                        userSelect: 'none',
+                                        transition: 'opacity 0.2s',
+                                    }}
+                                    onMouseEnter={(e) => currentEntry && (e.currentTarget.style.opacity = '0.7')}
+                                    onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                                >
+                                    {currentEntry?.displayName || 'My Journal'}
+                                </Title>
+                            )}
+                            {viewMode === 'single' && currentEntry && (
+                                <Text size="xs" c="dimmed">
+                                    {new Date(currentEntry.date).toLocaleString(undefined, {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}
+                                </Text>
+                            )}
+                        </Stack>
                     </Group>
                     <Group>
                         <ActionIcon variant="default" size="lg" onClick={openSettings} title="Settings">

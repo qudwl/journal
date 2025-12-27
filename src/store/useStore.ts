@@ -8,6 +8,7 @@ interface JournalState {
     sidebarOpened: boolean;
     mobileOpened: boolean;
     sortOrder: SortOption;
+    viewMode: 'feed' | 'single';
 
     // Data State
     entries: JournalEntry[];
@@ -20,6 +21,7 @@ interface JournalState {
     toggleMobile: () => void;
     closeMobile: () => void;
     setSortOrder: (order: SortOption) => void;
+    setViewMode: (mode: 'feed' | 'single') => void;
 
     loadEntries: () => Promise<void>;
     createEntry: () => Promise<void>;
@@ -34,6 +36,7 @@ export const useStore = create<JournalState>((set, get) => ({
     sidebarOpened: true,
     mobileOpened: false,
     sortOrder: 'date-desc',
+    viewMode: 'feed',
 
     // Data State
     entries: [],
@@ -46,6 +49,10 @@ export const useStore = create<JournalState>((set, get) => ({
     toggleMobile: () => set(state => ({ mobileOpened: !state.mobileOpened })),
     closeMobile: () => set({ mobileOpened: false }),
     setSortOrder: (order) => set({ sortOrder: order }),
+    setViewMode: (mode) => {
+        set({ viewMode: mode });
+        StorageService.saveSettings({ viewMode: mode });
+    },
 
     loadEntries: async () => {
         try {
@@ -53,9 +60,14 @@ export const useStore = create<JournalState>((set, get) => ({
             const list = await StorageService.listEntries();
             set({ entries: list });
 
-            // Initial load logic using "get()" to check state
             if (!get().initialLoadDone) {
                 set({ initialLoadDone: true });
+
+                const settings = await StorageService.loadSettings();
+                if (settings?.viewMode) {
+                    set({ viewMode: settings.viewMode });
+                }
+
                 const lastOpenedFilename = await StorageService.loadLastOpenedEntry();
 
                 if (lastOpenedFilename) {
@@ -66,13 +78,14 @@ export const useStore = create<JournalState>((set, get) => ({
                     }
                 }
 
-                // If empty, create new
-                if (list.length === 0) {
+                if (list.length > 0) {
+                    await get().selectEntry(list[0]);
+                } else {
                     await get().createEntry();
                 }
             }
         } catch (error) {
-            console.error('Failed to load entries:', error);
+            console.error('[Store] Failed to load entries:', error);
         } finally {
             set({ isLoading: false });
         }
