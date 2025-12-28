@@ -11,7 +11,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "npx tauri version ${nextRelease.version} && cargo fetch --manifest-path src-tauri/Cargo.toml"
+        "prepareCmd": "npm run tauri -- version ${nextRelease.version} && cargo fetch --manifest-path src-tauri/Cargo.toml"
       }
     ],
     [
